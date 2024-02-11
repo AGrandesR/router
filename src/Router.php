@@ -17,32 +17,6 @@ class TrueRouter {
     private array $routes;
     private array $pathOptions=[];
 
-    private function checkPath($path, &$options=[]) : bool {       
-        $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-        $path=trim($path,'/ ');
-        $checkingPathArray=explode('/',strtolower($path));
-
-        $currentPath=trim($currentPath,'/ ');
-        $actualPathArray=explode('/',strtolower($currentPath));
-        
-        if(Count($actualPathArray)!==Count($checkingPathArray)) return false;
-
-        foreach ($checkingPathArray as $keyNum=>$pathPart) {
-
-            //If is {variable-path} always is true we can continue
-            if(preg_match('/^\{.*\}$/', $pathPart)) {
-                $options[trim(' {}')]=$actualPathArray[$keyNum];
-                $this->pathOptions[trim(' {}')]=$actualPathArray[$keyNum];
-                continue;
-            }
-
-            //If not match we can return false to dont lose more time
-            if ($pathPart !== $actualPathArray[$keyNum]) return false;
-        }
-        return true;
-    }
-
     public function notFound(string $execute) {
         $this->executeString($execute);
     }
@@ -50,6 +24,10 @@ class TrueRouter {
     public function use(string $path, string $execute) : bool {
         if(!$this->checkPath($path)) return false;
         return $this->executeString($execute);
+    }
+    
+    public function getOption(string $key) {
+        return $this->pathOptions[$key]??null;
     }
 
     private function executeString(string $execute) : bool {
@@ -67,6 +45,32 @@ class TrueRouter {
         } 
 
         return false;
+    }
+
+    private function checkPath($path, &$options=[]) : bool {       
+        $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        $path=trim($path,'/ ');
+        $checkingPathArray=explode('/',strtolower($path));
+
+        $currentPath=trim($currentPath,'/ ');
+        $actualPathArray=explode('/',strtolower($currentPath));
+        
+        if(Count($actualPathArray)!==Count($checkingPathArray)) return false;
+
+        foreach ($checkingPathArray as $keyNum=>$pathPart) {
+
+            //If is {variable-path} always is true we can continue
+            if(preg_match('/^\{.*\}$/', $pathPart)) {
+                $options[trim($pathPart,' {}')]=$actualPathArray[$keyNum];
+                $this->pathOptions[trim($pathPart,' {}')]=$actualPathArray[$keyNum];
+                continue;
+            }
+
+            //If not match we can return false to dont lose more time
+            if ($pathPart !== $actualPathArray[$keyNum]) return false;
+        }
+        return true;
     }
 
     public function warning($msg, $file, $line) {
