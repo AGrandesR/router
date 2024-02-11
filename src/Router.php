@@ -1,5 +1,5 @@
 <?php
-namespace Agrandesr\EasyRouter;
+namespace Agrandesr\Http;
 
 use Error;
 use Exception;
@@ -49,7 +49,7 @@ class TrueRouter {
 
     public function use(string $path, string $execute) : bool {
         if(!$this->checkPath($path)) return false;
-        $this->executeString($execute);
+        return $this->executeString($execute);
     }
 
     private function executeString(string $execute) : bool {
