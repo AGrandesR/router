@@ -16,13 +16,17 @@ class TrueRouter {
     private $warningCallback;
     private array $routes;
     private array $pathOptions=[];
+    private bool $served=false;
 
     public function notFound(string $execute) {
         $this->executeString($execute);
     }
 
     public function use(string $path, string $execute) : bool {
-        if(!$this->checkPath($path)) return false;
+        //If is served the user or dont check we return false
+        if($this->served ||!$this->checkPath($path)) return false;
+        //We mark as served an execute the string
+        $this->served=true;
         return $this->executeString($execute);
     }
     
